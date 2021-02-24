@@ -1,26 +1,29 @@
 import React, {useState, useEffect} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import  firebase from 'firebase';
+import { firebaseApp } from '../../utils/firebase'
+
 import UserGuest from './UserGuest';
 import UserLogged from './UserLogged';
+import Loading from '../../components/Loading';
+import { getCurrentUser } from '../../utils/actions';
 
-import {firebaseApp} from '../../utils/firebase';
-import * as firebase from 'firebase';
-import 'firebase/firestore';
 
-export default function Account() {
-    const [login, setLogin] = useState(null);
+export default function Account(){
+    const [login, setLogin] = useState(null)
 
-    useEffect(()=>{
-        firebase.auth().onAuthStateChanged((user) =>{
-            user !== null ? (setLogin(false)) : setLogin(true);
-    }, []);
+    useEffect(() => {
+        const user = getCurrentUser();
+        user  ? setLogin(true) : setLogin(false);
     }, [])
 
     if(login == null){
-        return <Text>Cargando...</Text>
+        return <Loading isVisible={true} text="Cargando..." />
     }
 
-    return login ? <UserLogged/> : <UserGuest/>
+    return login ? <UserLogged/>:<UserGuest/>
 }
 
 const styles = StyleSheet.create({})
+
+
