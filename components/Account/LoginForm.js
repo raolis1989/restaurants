@@ -4,6 +4,10 @@ import { Button, Input, Icon } from 'react-native-elements'
 import Loading from '../Loading';
 import { useNavigation} from '@react-navigation/native'
 
+import { validateEmail } from '../../utils/helpers';
+import { loginWithEmailAndPassword } from '../../utils/actions';
+import { isEmpty } from 'lodash';
+
 export default function LoginForm() {
     const [showPassword, setShowPassword]= useState(false);
     const [formData, setFormData]= useState(defaultFormValue());
@@ -11,15 +15,29 @@ export default function LoginForm() {
     const[errorPassword, setErrorPassword]=useState("")
     const [loading, setLoading] = useState(false)
 
+    const navigation = useNavigation()
+
     const onChange = (e, type) => {
         setFormData({...formData, [type]: e.nativeEvent.text})    
     }
 
-    const doLogin =()=>{
-        console.log("Login")
+    const doLogin = async ()=>{
+        if(!validateData()){
+            return;
+        }
+
+        setLoading(true)
+        const result = await  loginWithEmailAndPassword(formData.email, formData.password)
+        setLoading(false)
+        if(!result.statusResponse){
+            setErrorEmail(result.error);
+            setErrorPassword(result.error);
+            return;
+        }
+        navigation.navigate("accounts");
     }
+    
     const validateData =() => {
-        setErrorConfirm("");
         setErrorEmail("");
         setErrorPassword("");
         let isValid = true;
@@ -27,10 +45,10 @@ export default function LoginForm() {
         if(!validateEmail(formData.email)){
             setErrorEmail("Debes de ingresar un email valido.")
             isValid=false;
-
         }
-        if(size(formData.password)<6){
-            setErrorConfirm("Debes de ingresar una contraseña de al menos seis")
+
+        if(isEmpty(formData.password)){
+            setErrorPassword("Debes de ingresar tu contraseña.")
             isValid=false;
         }
         return isValid
