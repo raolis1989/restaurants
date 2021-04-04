@@ -7,7 +7,7 @@ import ChangeDisplayNameForm from './changeDisplayNameForm';
 import ChangeEmailForm from './changeEmailForm';
 import ChangePasswordForm from './changePasswordForm';
 
-export default function AccountOptions({user, toastRef}) {
+export default function AccountOptions({user, toastRef, setReloadUser }) {
     
     const [showModal, setShowModal] = useState(false)
     const [renderComponent, setRenderComponent] = useState(null)
