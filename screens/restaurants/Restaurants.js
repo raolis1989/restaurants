@@ -29,7 +29,7 @@ export default function Restaurants({navigation}) {
                         color="#6cbc94"
                         reverse
                         containerStyle={styles.btnContainer}
-                        onPress={() => navigation.navigate("add-restaurant")}
+                        onPress={() => navigation.navigate("add-restaurants")}
                     />
                 )
             }
