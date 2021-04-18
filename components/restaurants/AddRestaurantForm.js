@@ -6,6 +6,8 @@ import {map, size, filter, isEmpty} from 'lodash'
 import { getCurrentLocation, loadImageFromGallery, validateEmail } from '../../utils/helpers'
 import Modal from '../../components/Modal'
 import MapView from 'react-native-maps'
+import uuid from 'random-uuid-v4'
+import { uploadImage } from '../../utils/actions';
 
 
 const widthScreen = Dimensions.get("window").width
@@ -22,13 +24,31 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
     const [imagesSelected, setImagesSelected] = useState([])
     const [isVisibleMap, setIsVisibleMap]= useState(false)
     const [locationRestaurant, setLocationRestaurant]= useState(null)
-    const addRestaurant = () => {
+    const addRestaurant = async() => {
 
         if(!validForm()){
-
+            return;
         }
 
+        setLoading(true);
+        const response  =  await uploadImages();
+        console.log(response);
+        setLoading(false);
+
         console.log("Hola restaurant");
+    }
+
+    const uploadImages = async() => {
+        const imagesUrl = [];
+        await Promise.all(
+            map(imagesSelected, async(image) => {
+                const response = await uploadImage(image, "restaurants", uuid())
+                if(response.statusResponse){
+                    imagesUrl.push(response.url);
+                }
+            })
+        )
+        return imagesUrl;
     }
 
     const validForm = () => {
@@ -45,7 +65,7 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             isValid= false;
         }
 
-        if(isEmpty(formData.phoneView)){
+        if(isEmpty(formData.phone)){
             setErrorPhone("Debes ingresar el  telefono del restaurant.");
             isValid= false;
         }
@@ -55,7 +75,7 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             isValid= false;
         }
 
-        if(validateEmail(formData.email)){
+        if(!validateEmail(formData.email)){
             setErrorEmail("Debes ingresa el email del restaurant.");
             isValid= false;
         }
@@ -75,6 +95,7 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
 
     const clearErrors = () =>{
         setErrorDescription(null)
+        setErrorAddress(null)
         setErrorEmail(null)
         setErrorName(null)
         setErrorPhone(null)
