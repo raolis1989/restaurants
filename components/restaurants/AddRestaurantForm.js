@@ -2,8 +2,8 @@ import React, {useState, useEffect } from 'react'
 import { StyleSheet, Text, View, ScrollView, Alert, Dimensions } from 'react-native'
 import {  Avatar, Button, Icon, Input, Image  } from 'react-native-elements'
 import CountryPicker from 'react-native-country-picker-modal'
-import {map, size, filter} from 'lodash'
-import { getCurrentLocation, loadImageFromGallery } from '../../utils/helpers'
+import {map, size, filter, isEmpty} from 'lodash'
+import { getCurrentLocation, loadImageFromGallery, validateEmail } from '../../utils/helpers'
 import Modal from '../../components/Modal'
 import MapView from 'react-native-maps'
 
@@ -23,8 +23,61 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
     const [isVisibleMap, setIsVisibleMap]= useState(false)
     const [locationRestaurant, setLocationRestaurant]= useState(null)
     const addRestaurant = () => {
-        console.log(formData);
+
+        if(!validForm()){
+
+        }
+
         console.log("Hola restaurant");
+    }
+
+    const validForm = () => {
+        clearErrors(); 
+        let isValid = true; 
+
+        if(isEmpty(formData.name)){
+            setErrorName("Debes ingresar el nombre del restaurant.");
+            isValid= false;
+        }
+
+        if(isEmpty(formData.address)){
+            setErrorAddress("Debes ingresar la direccion del restaurante.");
+            isValid= false;
+        }
+
+        if(isEmpty(formData.phoneView)){
+            setErrorPhone("Debes ingresar el  telefono del restaurant.");
+            isValid= false;
+        }
+
+        if(isEmpty(formData.description)){
+            setErrorDescription("Debes ingresar una descripcion del restaurant.");
+            isValid= false;
+        }
+
+        if(validateEmail(formData.email)){
+            setErrorEmail("Debes ingresa el email del restaurant.");
+            isValid= false;
+        }
+
+        if(!locationRestaurant){
+            toastRef.current.show("Desbes marcar en el mapa la ubicacion del restaurant.", 3000)        
+            isValid=false
+        }
+        else if (size(imagesSelected)===0){
+            toastRef.current.show("Debes de agregar al menos una imagen al restaurant", 3000)
+            isValid=false
+        }
+
+        return isValid;
+
+    }
+
+    const clearErrors = () =>{
+        setErrorDescription(null)
+        setErrorEmail(null)
+        setErrorName(null)
+        setErrorPhone(null)
     }
     
     return (
@@ -57,7 +110,6 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             <MapRestaurant
                 isVisibleMap={isVisibleMap}
                 setIsVisibleMap={setIsVisibleMap}
-                locationRestaurant={locationRestaurant}
                 setLocationRestaurant={setLocationRestaurant}
                 toastRef={toastRef}
             />
@@ -65,14 +117,13 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
     )
 }
 
-function MapRestaurant({isVisibleMap, setIsVisibleMap, locationRestaurant, setLocationRestaurant, toastRef}){
-    const [newRegion, setnewRegion] = useState(null);
+function MapRestaurant({isVisibleMap, setIsVisibleMap,  setLocationRestaurant, toastRef}){
+    const [newRegion, setNewRegion] = useState(null);
     useEffect(() => {
         (async() => {
             const response = await getCurrentLocation()
             if (response.status) {
-                console.log(response.location);
-                setLocationRestaurant(response.location)
+                setNewRegion(response.location)
             }
         })()
     }, [])
@@ -93,17 +144,17 @@ function MapRestaurant({isVisibleMap, setIsVisibleMap, locationRestaurant, setLo
             >
                 <View>
                     {
-                        locationRestaurant && (
+                        newRegion && (
                             <MapView
                                 style={styles.mapStyle}
-                                region={locationRestaurant}
-                                showsUserLocation
-                                onRegionChange={(region) => setLocationRestaurant(region)}
+                                initialRegion={newRegion}
+                                showsUserLocation={true}
+                                onRegionChange={(region) => setNewRegion(region)}
                             >
                                  <MapView.Marker
                                     coordinate={{
-                                        latitude: locationRestaurant.latitude,
-                                        longitude: locationRestaurant.longitude
+                                        latitude: newRegion.latitude,
+                                        longitude: newRegion.longitude
                                     }}
                                     draggable
                                      />
