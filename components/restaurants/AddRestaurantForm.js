@@ -39,7 +39,7 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             description : formData.description, 
             callingCode : formData.callingCode,
             phone : formData.phone,
-            location = locationRestaurant, 
+            location : locationRestaurant, 
             images : imagesSelected,
             rating:0,
             ratingTotal:0,
@@ -48,9 +48,11 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             createBy: getCurrentUser().uid
 
         }
+        
         const responseAddDocument = await addDocumentWithoutId("restaurants", restaurant);
         setLoading(false);
         if(!responseAddDocument.statusResponse){
+            console.log(responseAddDocument.error);
             toastRef.current.show("Error al grabar el restaurant, por favor intenta mas tarde", 3000);
             return;
         }
