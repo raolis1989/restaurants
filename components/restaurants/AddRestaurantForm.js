@@ -7,7 +7,7 @@ import { getCurrentLocation, loadImageFromGallery, validateEmail } from '../../u
 import Modal from '../../components/Modal'
 import MapView from 'react-native-maps'
 import uuid from 'random-uuid-v4'
-import { uploadImage } from '../../utils/actions';
+import { addDocumentWithoutId, getCurrentUser, uploadImage } from '../../utils/actions';
 
 
 const widthScreen = Dimensions.get("window").width
@@ -42,10 +42,20 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
             location = locationRestaurant, 
             images : imagesSelected,
             rating:0,
-            ratingTotal:0
+            ratingTotal:0,
+            quantityVoting:0,
+            createAt: new Date(),
+            createBy: getCurrentUser().uid
 
         }
+        const responseAddDocument = await addDocumentWithoutId("restaurants", restaurant);
         setLoading(false);
+        if(!responseAddDocument.statusResponse){
+            toastRef.current.show("Error al grabar el restaurant, por favor intenta mas tarde", 3000);
+            return;
+        }
+
+        navigation.navigate("restaurants");
 
         console.log("Hola restaurant");
     }
