@@ -31,8 +31,20 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
         }
 
         setLoading(true);
-        const response  =  await uploadImages();
-        console.log(response);
+        const responseUploadImages  =  await uploadImages();
+        const restaurant = {
+            name : formData.name,
+            address : formData.address,
+            email : formData.email,
+            description : formData.description, 
+            callingCode : formData.callingCode,
+            phone : formData.phone,
+            location = locationRestaurant, 
+            images : imagesSelected,
+            rating:0,
+            ratingTotal:0
+
+        }
         setLoading(false);
 
         console.log("Hola restaurant");
